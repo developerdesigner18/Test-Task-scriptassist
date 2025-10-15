@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Ht
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
@@ -22,6 +22,8 @@ export class TasksController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new task' })
+  @ApiResponse({ status: 201, description: 'The task has been successfully created.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
   create(@Body() createTaskDto: CreateTaskDto, @Req() req) {
     return this.tasksService.create(createTaskDto, req.user.id);
   }
@@ -32,6 +34,7 @@ export class TasksController {
   @ApiQuery({ name: 'priority', required: false, enum: TaskPriority })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Return all tasks.' })
   async findAll(@Query() query: { status?: TaskStatus; priority?: TaskPriority; page?: number; limit?: number }) {
     const { status, priority, page = 1, limit = 10 } = query;
     return this.tasksService.findAll({
@@ -44,30 +47,38 @@ export class TasksController {
 
   @Get('stats')
   @ApiOperation({ summary: 'Get task statistics' })
+  @ApiResponse({ status: 200, description: 'Return task statistics.' })
   async getStats() {
     return this.tasksService.getStats();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Find a task by ID' })
+  @ApiResponse({ status: 200, description: 'Return the task.' })
+  @ApiResponse({ status: 404, description: 'Task not found.' })
   async findOne(@Param('id') id: string, @Req() req) {
     return this.tasksService.findOne(id, req.user.id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a task' })
+  @ApiResponse({ status: 200, description: 'The task has been successfully updated.' })
+  @ApiResponse({ status: 404, description: 'Task not found.' })
   update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req) {
     return this.tasksService.update(id, updateTaskDto, req.user.id);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a task' })
+  @ApiResponse({ status: 200, description: 'The task has been successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Task not found.' })
   remove(@Param('id') id: string, @Req() req) {
     return this.tasksService.remove(id, req.user.id);
   }
 
   @Post('batch')
   @ApiOperation({ summary: 'Batch process multiple tasks' })
+  @ApiResponse({ status: 200, description: 'Batch process completed.' })
   async batchProcess(@Body() operations: { tasks: string[], action: string }, @Req() req) {
     const { tasks: taskIds, action } = operations;
     const results = [];
