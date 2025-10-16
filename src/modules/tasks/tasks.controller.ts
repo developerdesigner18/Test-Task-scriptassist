@@ -11,6 +11,7 @@ import { TaskPriority } from './enums/task-priority.enum';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Request } from 'express';
 
 @ApiTags('tasks')
 @Controller('tasks')
@@ -24,7 +25,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Create a new task' })
   @ApiResponse({ status: 201, description: 'The task has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  create(@Body() createTaskDto: CreateTaskDto, @Req() req) {
+  create(@Body() createTaskDto: CreateTaskDto, @Req() req:Request | any) {
     return this.tasksService.create(createTaskDto, req.user.id);
   }
 
@@ -56,7 +57,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Find a task by ID' })
   @ApiResponse({ status: 200, description: 'Return the task.' })
   @ApiResponse({ status: 404, description: 'Task not found.' })
-  async findOne(@Param('id') id: string, @Req() req) {
+  async findOne(@Param('id') id: string, @Req() req:Request | any) {
     return this.tasksService.findOne(id, req.user.id);
   }
 
@@ -64,7 +65,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Update a task' })
   @ApiResponse({ status: 200, description: 'The task has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'Task not found.' })
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req) {
+  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req:Request | any) {
     return this.tasksService.update(id, updateTaskDto, req.user.id);
   }
 
@@ -72,14 +73,14 @@ export class TasksController {
   @ApiOperation({ summary: 'Delete a task' })
   @ApiResponse({ status: 200, description: 'The task has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Task not found.' })
-  remove(@Param('id') id: string, @Req() req) {
+  remove(@Param('id') id: string, @Req() req:Request | any) {
     return this.tasksService.remove(id, req.user.id);
   }
 
   @Post('batch')
   @ApiOperation({ summary: 'Batch process multiple tasks' })
   @ApiResponse({ status: 200, description: 'Batch process completed.' })
-  async batchProcess(@Body() operations: { tasks: string[], action: string }, @Req() req) {
+  async batchProcess(@Body() operations: { tasks: string[], action: string }, @Req() req:Request | any) {
     const { tasks: taskIds, action } = operations;
     const results = [];
 
