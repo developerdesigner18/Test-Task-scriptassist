@@ -47,7 +47,7 @@ export class TaskProcessorService extends WorkerHost {
     // Inefficient: No validation of status values
     // No transaction handling
     // No retry mechanism
-    const task = await this.tasksService.updateStatus(taskId, status);
+    const task = await this.tasksService.updateStatus(taskId, status, undefined);
     
     return { 
       success: true,

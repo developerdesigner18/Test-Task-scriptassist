@@ -67,18 +67,25 @@ export class TasksService {
     };
   }
 
-  async findOne(id: string, userId: string): Promise<Task> {
-    const task = await this.tasksRepository.findOne({
-      where: { id, user: { id: userId } },
-      relations: ['user'],
-    });
 
-    if (!task) {
-      throw new NotFoundException(`Task with ID ${id} not found`);
-    }
 
-    return task;
+  async findOne(id: string, userId?: string): Promise<Task> {
+  const where = userId
+    ? { id, user: { id: userId } }
+    : { id };
+
+  const task = await this.tasksRepository.findOne({
+    where,
+    relations: ['user'],
+  });
+
+  if (!task) {
+    throw new NotFoundException(`Task with ID ${id} not found`);
   }
+
+  return task;
+}
+
 
   async update(id: string, updateTaskDto: UpdateTaskDto, userId: string): Promise<Task> {
     const task = await this.findOne(id, userId);
@@ -119,12 +126,12 @@ export class TasksService {
     return this.tasksRepository.query(query, [status]);
   }
 
-  async updateStatus(id: string, status: string, userId: string): Promise<Task> {
-    // This method will be called by the task processor
-    const task = await this.findOne(id, userId);
+  async updateStatus(id: string, status: string, userId?: string): Promise<Task> {
+    const task = userId ? await this.findOne(id, userId) : await this.findOne(id);
     task.status = status as any;
     return this.tasksRepository.save(task);
   }
+
 
   async getStats() {
     const stats = await this.tasksRepository
